@@ -1,0 +1,16 @@
+# Credenciales — NUNCA subir a GitHub
+.env.local
+.env
+*.json.key
+*-credentials.json
+*-beauty-*.json
+noreh-beauty*.json
+
+# Next.js
+.next/
+out/
+node_modules/
+
+# Sistema
+.DS_Store
+*.log

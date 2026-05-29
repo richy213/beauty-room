@@ -1,0 +1,69 @@
+{
+  "hero": {
+    "eyebrow": "Ciudad de México · Luxury Makeup Artist",
+    "tagline": "Arte · Elegancia · Exclusividad"
+  },
+  "about": {
+    "title": "El arte de transformar",
+    "quote": "El maquillaje no oculta — revela la versión más luminosa de ti misma.",
+    "bio": "Noreh Mejía es una artista de maquillaje con sede en Ciudad de México, especializada en crear looks editoriales y de lujo que celebran la individualidad. Con años de experiencia en bodas de alto perfil, sesiones fotográficas editoriales y eventos de élite.",
+    "photo": null,
+    "stats": [
+      { "number": "8+", "label": "Años de experiencia" },
+      { "number": "500+", "label": "Clientes satisfechas" },
+      { "number": "100%", "label": "Satisfacción" },
+      { "number": "CDMX", "label": "Y toda la República" }
+    ]
+  },
+  "valores": [
+    { "icon": "clock", "name": "Puntualidad", "desc": "Respetamos tus tiempos y los de cada producción o evento especial." },
+    { "icon": "star", "name": "Calidad", "desc": "Productos profesionales de alta definición para resultados impecables y duraderos." },
+    { "icon": "heart", "name": "Enfoque en ti", "desc": "Cada look resalta tu belleza única y cuenta tu historia personal." },
+    { "icon": "shield", "name": "Flexibilidad", "desc": "Nos adaptamos a tu locación, horario y tipo de producción." }
+  ],
+  "servicios": [
+    {
+      "category": "Especial · Eventos",
+      "name": "Ocasión Especial",
+      "price": "Consultar precio",
+      "desc": "Para bodas, graduaciones, galas y cualquier evento donde quieras lucir impecable.",
+      "features": ["Consulta de concepto y outfit", "Aplicación de larga duración", "Retoque on-site disponible"],
+      "photo": null
+    },
+    {
+      "category": "Artístico · Teatral",
+      "name": "Maquillaje Artístico",
+      "price": "Consultar precio",
+      "desc": "Transformaciones completas para sesiones fotográficas, teatro, cine y producciones artísticas.",
+      "features": ["Diseño de caracterización", "Técnicas especiales", "Efectos dramáticos"],
+      "photo": null
+    },
+    {
+      "category": "Editorial · Fotografía",
+      "name": "Maquillaje Editorial",
+      "price": "Consultar precio",
+      "desc": "Looks de alto impacto visual para sesiones fotográficas y producciones de moda.",
+      "features": ["Colaboración creativa", "Alta definición para cámara", "Soporte on-set continuo"],
+      "photo": null
+    }
+  ],
+  "especialidades": {
+    "photo": null,
+    "items": [
+      { "num": "01", "name": "Maquillaje Teatral", "desc": "Caracterización completa para teatro, danza y performance. Resistente a luces y cámaras de escena." },
+      { "num": "02", "name": "Soft Glam & Nupcial", "desc": "El look perfecto para el día más importante. Prueba incluida, novia y cortejo completo." },
+      { "num": "03", "name": "Editorial & Moda", "desc": "Looks de alto impacto visual para sesiones fotográficas, campañas y producciones de moda." },
+      { "num": "04", "name": "Looks Creativos", "desc": "Arte sin límites. Expresión artística libre para proyectos únicos y especiales." }
+    ]
+  },
+  "testimonios": [
+    { "quote": "Noreh transformó completamente mi look para mi evento. Su trabajo es increíblemente detallado y duradero. ¡Una artista excepcional!", "author": "Valentina R.", "role": "Directora Teatral" },
+    { "quote": "Mi sesión editorial quedó increíble. Noreh entendió perfectamente el concepto y los looks duraron todo el día de producción.", "author": "Sofía M.", "role": "Fotógrafa de Moda" },
+    { "quote": "El maquillaje de mi boda fue perfecto. Noreh es detallista, puntual y tiene un ojo artístico único.", "author": "Andrea L.", "role": "Novia" }
+  ],
+  "social": {
+    "instagram": "https://www.instagram.com/noreh_mejia",
+    "tiktok": "https://www.tiktok.com/@norehmejia1",
+    "whatsapp": "https://wa.me/message/3DWX7EA3RBP3J1"
+  }
+}
