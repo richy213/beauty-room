@@ -196,7 +196,7 @@ export default function Home({ categories: initialCategories, siteContent }) {
   const socialLinks = {
     instagram: siteContent?.social?.instagram || "https://www.instagram.com/noreh_mejia",
     tiktok:    siteContent?.social?.tiktok    || "https://www.tiktok.com/@norehmejia1",
-    whatsapp:  siteContent?.social?.whatsapp  || "https://wa.me/message/3DWX7EA3RBP3J1",
+    whatsapp:  siteContent?.social?.whatsapp  || "https://wa.me/17821074077",
   };
 
   // Gradient placeholders for orbital (beauty tones)
