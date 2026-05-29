@@ -1145,31 +1145,32 @@ export default function Home({ categories: initialCategories, siteContent }) {
   );
 }
 
-// ISR: la página se pre-genera una vez y se sirve desde CDN.
-// Se regenera en background cada hora sin bloquear a los usuarios.
 export async function getStaticProps() {
   let siteContent = {};
   let categories  = [];
 
-  // Leer CMS
   try {
-    const fs  = (await import("fs")).default;
-    const pth = (await import("path")).default;
-    const raw = fs.readFileSync(pth.join(process.cwd(), "public", "site-content.json"), "utf8");
-    siteContent = JSON.parse(raw);
+    const { readContent } = await import("../lib/content");
+    siteContent = await readContent();
   } catch(e) {}
 
-  // Portfolio — las imágenes se cargan on-demand en el cliente
   try {
     const { getPortfolio } = await import("../lib/drive");
     categories = await getPortfolio();
   } catch(err) {
     console.error("Build portfolio error:", err.message);
-    // categories queda [] → el cliente lo carga via /api/portfolio
+  }
+
+  // Aplicar orden y visibilidad definidos en el admin
+  const featuredIds = siteContent?.portfolio?.featured;
+  if (featuredIds && featuredIds.length > 0) {
+    const ordered = featuredIds.map(id => categories.find(c => c.id === id)).filter(Boolean);
+    const hidden  = new Set(siteContent?.portfolio?.hidden || []);
+    categories = ordered.filter(c => !hidden.has(c.id));
   }
 
   return {
     props: { categories, siteContent },
-    revalidate: 3600, // ISR: regenerar cada hora en background
+    revalidate: 3600,
   };
 }
