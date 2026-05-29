@@ -714,11 +714,18 @@ export default function Home({ categories: initialCategories, siteContent }) {
           <div style={{maxWidth:"1100px",margin:"0 auto",padding:"0 3rem",display:"grid",gridTemplateColumns:"1fr 1.2fr",gap:"6rem",alignItems:"center"}} className="about-grid">
             <div style={{position:"relative"}}>
               <div style={{aspectRatio:"3/4",background:isDark?"linear-gradient(145deg,#1a1510 0%,#0e0b07 100%)":"linear-gradient(145deg,#EDE8E2 0%,#D8CFC4 100%)",display:"flex",alignItems:"center",justifyContent:"center",border:"1px solid rgba(201,185,154,0.2)",position:"relative",overflow:"hidden"}}>
-                <div style={{position:"absolute",inset:0,backgroundImage:"repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(201,185,154,0.03) 20px,rgba(201,185,154,0.03) 21px)"}}/>
-                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(6rem,15vw,11rem)",color:"rgba(201,185,154,0.07)",fontStyle:"italic",lineHeight:1,userSelect:"none"}}>N</div>
-                <div style={{position:"absolute",bottom:"1.5rem",left:0,right:0,textAlign:"center"}}>
-                  <div style={{fontFamily:"'Montserrat',sans-serif",fontSize:"0.46rem",letterSpacing:"0.3em",textTransform:"uppercase",color:"rgba(201,185,154,0.28)"}}>Fotografía próximamente</div>
-                </div>
+                {siteContent?.about?.photo ? (
+                  <img src={siteContent.about.photo} alt="Noreh Mejía"
+                    style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
+                ) : (
+                  <>
+                    <div style={{position:"absolute",inset:0,backgroundImage:"repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(201,185,154,0.03) 20px,rgba(201,185,154,0.03) 21px)"}}/>
+                    <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(6rem,15vw,11rem)",color:"rgba(201,185,154,0.07)",fontStyle:"italic",lineHeight:1,userSelect:"none"}}>N</div>
+                    <div style={{position:"absolute",bottom:"1.5rem",left:0,right:0,textAlign:"center"}}>
+                      <div style={{fontFamily:"'Montserrat',sans-serif",fontSize:"0.46rem",letterSpacing:"0.3em",textTransform:"uppercase",color:"rgba(201,185,154,0.28)"}}>Fotografía próximamente</div>
+                    </div>
+                  </>
+                )}
               </div>
               <div style={{position:"absolute",bottom:"-1rem",right:"-1rem",width:"55%",aspectRatio:"1",border:"1px solid rgba(201,185,154,0.1)",zIndex:-1}}/>
               <div style={{position:"absolute",top:"2rem",left:"-1px",background:colors.ch,padding:"0.5rem 1rem"}}>
@@ -743,7 +750,7 @@ export default function Home({ categories: initialCategories, siteContent }) {
         </section>
 
         {/* ── SERVICIOS ENHANCED ── */}
-        <section id="servicios" style={{background:colors.surface,padding:"8rem 0"}}>
+        <section id="servicios" style={{background:colors.bg,padding:"8rem 0"}}>
           <div style={{maxWidth:"1200px",margin:"0 auto",padding:"0 3rem"}}>
             <div style={{textAlign:"center",maxWidth:"520px",margin:"0 auto 5rem"}}>
               <p style={{fontSize:"0.55rem",letterSpacing:"0.5em",textTransform:"uppercase",color:colors.ch,marginBottom:"1rem"}}>Servicios exclusivos</p>
