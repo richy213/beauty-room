@@ -669,7 +669,7 @@ export default function Home({ categories: initialCategories, siteContent }) {
                   </div>
                 </div>
               ) : (
-                <div key={i} style={{background:"#C9B99A",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"0.8rem",cursor:"pointer",padding:"1.5rem",transition:"background 0.3s",gridColumn:"span 2"}}
+                <div key={i} style={{background:"#C9B99A",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"0.8rem",cursor:"pointer",padding:"1.5rem",transition:"background 0.3s"}}
                   onClick={()=>document.getElementById("portfolio")?.scrollIntoView({behavior:"smooth"})}
                   onMouseOver={e=>e.currentTarget.style.background="#C4A035"}
                   onMouseOut={e=>e.currentTarget.style.background="#C9B99A"}>
