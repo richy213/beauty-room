@@ -646,7 +646,7 @@ export default function Home({ categories: initialCategories, siteContent }) {
             <div className="feat-cell" style={{gridRow:"1/3",position:"relative",overflow:"hidden",
               background:featuredCats[0]?.cover?"#1a1510":pgrd[0],cursor:"pointer"}}
               onClick={()=>document.getElementById("portfolio")?.scrollIntoView({behavior:"smooth"})}>
-              {featuredCats[0]?.cover&&<img src={featuredCats[0].thumb||featuredCats[0].cover} alt={featuredCats[0].name} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>}
+              {featuredCats[0]?.cover&&<img src={featuredCats[0].cover} alt={featuredCats[0].name} loading="lazy" fetchpriority="low" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>}
               <div style={{position:"absolute",inset:0,background:"linear-gradient(to top,rgba(0,0,0,0.75) 0%,rgba(0,0,0,0.1) 50%,transparent 100%)"}}/>
               <div style={{position:"absolute",bottom:"2rem",left:"2rem",zIndex:2}}>
                 <div style={{fontFamily:"'Montserrat',sans-serif",fontSize:"0.5rem",letterSpacing:"0.3em",textTransform:"uppercase",color:"rgba(201,185,154,0.6)",marginBottom:"0.4rem"}}>{featuredCats[0]?`${featuredCats[0].count} looks`:"Bridal Glam"}</div>
@@ -662,7 +662,7 @@ export default function Home({ categories: initialCategories, siteContent }) {
                 <div key={i} className="feat-cell" style={{position:"relative",overflow:"hidden",
                   background:featuredCats[i]?.cover?"#1a1510":pgrd[i],cursor:"pointer"}}
                   onClick={()=>document.getElementById("portfolio")?.scrollIntoView({behavior:"smooth"})}>
-                  {featuredCats[i]?.cover&&<img src={featuredCats[i].thumb||featuredCats[i].cover} alt={featuredCats[i].name} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>}
+                  {featuredCats[i]?.cover&&<img src={featuredCats[i].thumb||featuredCats[i].cover} alt={featuredCats[i].name} loading="lazy" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>}
                   <div style={{position:"absolute",inset:0,background:"linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 55%)"}}/>
                   <div style={{position:"absolute",bottom:"1.2rem",left:"1.2rem",zIndex:2}}>
                     <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.2rem",fontWeight:300,color:"#FAF8F5",fontStyle:"italic"}}>{featuredCats[i]?.name||["Editorial","Soft Glam"][i-1]}</div>

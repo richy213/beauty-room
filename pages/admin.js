@@ -190,9 +190,17 @@ export default function Admin() {
       body: JSON.stringify(content)
     });
     setSaving(false);
-    if (res.ok) { setMsg("✓ Guardado"); }
-    else { setMsg("✗ Error al guardar"); }
-    setTimeout(()=>setMsg(""), 4000);
+    if (res.ok) {
+      setMsg("✓ Guardado — aplicando cambios...");
+      // Revalidar ISR para que el sitio refleje cambios inmediatamente
+      fetch("/api/admin/revalidate", { headers:{ "x-admin-token":token } })
+        .then(() => setMsg("✓ Cambios aplicados en el sitio"))
+        .catch(() => setMsg("✓ Guardado (el sitio se actualiza en ~1 min)"));
+    } else {
+      const j = await res.json().catch(() => ({}));
+      setMsg("✗ " + (j.error || "Error al guardar"));
+    }
+    setTimeout(()=>setMsg(""), 6000);
   };
 
   const set = (path, val) => {
