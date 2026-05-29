@@ -577,7 +577,7 @@ export default function Home({ categories: initialCategories, siteContent }) {
             <p style={{fontFamily:"'Montserrat',sans-serif",fontSize:"0.58rem",letterSpacing:"0.5em",
               textTransform:"uppercase",color:"rgba(201,185,154,0.85)",marginBottom:"1.8rem",
               animation:"ldFadeUp 1s 2.7s ease both"}}>
-              Ciudad de México · Luxury Makeup Artist
+              {siteContent?.hero?.eyebrow || "Ciudad de México · Luxury Makeup Artist"}
             </p>
 
             <div style={{pointerEvents:"all",animation:"ldFadeUp 1s 2.9s ease both"}}>
@@ -591,7 +591,7 @@ export default function Home({ categories: initialCategories, siteContent }) {
             <p style={{fontSize:"0.56rem",letterSpacing:"0.42em",textTransform:"uppercase",
               color:"rgba(201,185,154,0.42)",marginBottom:"2.8rem",
               animation:"ldFadeUp 1s 3.1s ease both"}}>
-              Arte · Elegancia · Exclusividad
+              {siteContent?.hero?.tagline || "Arte · Elegancia · Exclusividad"}
             </p>
 
             <div style={{display:"flex",gap:"1rem",justifyContent:"center",flexWrap:"wrap",
@@ -735,13 +735,13 @@ export default function Home({ categories: initialCategories, siteContent }) {
             <div>
               <p style={{fontSize:"0.55rem",letterSpacing:"0.5em",textTransform:"uppercase",color:colors.ch,marginBottom:"1.2rem"}}>Sobre la artista</p>
               <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(2rem,4vw,3.5rem)",fontWeight:300,lineHeight:1,color:colors.text,marginBottom:"1.8rem"}}>El arte de <em style={{color:colors.ch}}>transformar</em></h2>
-              <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.3rem",fontStyle:"italic",fontWeight:300,lineHeight:1.6,color:colors.text,marginBottom:"1.5rem",opacity:0.9}}>"El maquillaje no oculta — revela la versión más luminosa de ti misma."</p>
-              <p style={{fontSize:"0.72rem",lineHeight:2,color:colors.muted,fontWeight:300,marginBottom:"1.2rem",letterSpacing:"0.04em",opacity:0.72}}>Noreh Mejía es una artista de maquillaje con sede en Ciudad de México, especializada en crear looks editoriales y de lujo que celebran la individualidad. Con años de experiencia en bodas de alto perfil, sesiones fotográficas editoriales y eventos de élite.</p>
+              <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.3rem",fontStyle:"italic",fontWeight:300,lineHeight:1.6,color:colors.text,marginBottom:"1.5rem",opacity:0.9}}>"{siteContent?.about?.quote || "El maquillaje no oculta — revela la versión más luminosa de ti misma."}"</p>
+              <p style={{fontSize:"0.72rem",lineHeight:2,color:colors.muted,fontWeight:300,marginBottom:"1.2rem",letterSpacing:"0.04em",opacity:0.72}}>{siteContent?.about?.bio || "Noreh Mejía es una artista de maquillaje con sede en Ciudad de México, especializada en crear looks editoriales y de lujo que celebran la individualidad. Con años de experiencia en bodas de alto perfil, sesiones fotográficas editoriales y eventos de élite."}</p>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"1.5rem",marginTop:"2.5rem",paddingTop:"2.5rem",borderTop:"1px solid rgba(201,185,154,0.15)"}}>
-                {[["8+","Años de experiencia"],["500+","Novias maquilladas"],["100%","Satisfacción"],["CDMX","Y toda la República"]].map(([n,l])=>(
-                  <div key={l}>
-                    <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"2.2rem",fontWeight:300,color:colors.ch,lineHeight:1}}>{n}</div>
-                    <div style={{fontSize:"0.55rem",letterSpacing:"0.2em",textTransform:"uppercase",color:colors.muted,marginTop:"0.25rem"}}>{l}</div>
+                {(siteContent?.about?.stats || [["8+","Años de experiencia"],["500+","Novias maquilladas"],["100%","Satisfacción"],["CDMX","Y toda la República"]].map(([number,label])=>({number,label}))).map((s)=>(
+                  <div key={s.label||s.number}>
+                    <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"2.2rem",fontWeight:300,color:colors.ch,lineHeight:1}}>{s.number}</div>
+                    <div style={{fontSize:"0.55rem",letterSpacing:"0.2em",textTransform:"uppercase",color:colors.muted,marginTop:"0.25rem"}}>{s.label}</div>
                   </div>
                 ))}
               </div>
@@ -773,7 +773,7 @@ export default function Home({ categories: initialCategories, siteContent }) {
                     <div style={{fontSize:"0.48rem",letterSpacing:"0.4em",textTransform:"uppercase",color:colors.ch,marginBottom:"0.6rem"}}>{svc.category}</div>
                     <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.4rem",fontWeight:400,color:colors.text,marginBottom:"0.4rem",lineHeight:1.2}}>{svc.name}</div>
                     <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1rem",fontStyle:"italic",color:colors.ch,marginBottom:"1rem"}}>{svc.price}</div>
-                    <p style={{fontSize:"0.65rem",lineHeight:1.9,color:colors.muted,fontWeight:300,marginBottom:"1.2rem",opacity:0.72}}>{svc.description}</p>
+                    <p style={{fontSize:"0.65rem",lineHeight:1.9,color:colors.muted,fontWeight:300,marginBottom:"1.2rem",opacity:0.72}}>{svc.desc || svc.description}</p>
                     {svc.features && (
                       <ul style={{listStyle:"none",marginBottom:"1.5rem",display:"flex",flexDirection:"column",gap:"0.4rem"}}>
                         {svc.features.map((f, fi) => (
