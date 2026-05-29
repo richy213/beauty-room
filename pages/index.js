@@ -134,9 +134,8 @@ function OrbitalPortfolio({ categories }) {
           <g onClick={()=>setOpenGallery(cat)} style={{cursor:"pointer"}}>
             <rect x="185" y="175" width="150" height="170" rx="4" fill="rgba(10,10,10,0.8)" stroke="rgba(201,185,154,0.35)" strokeWidth="1"/>
             {cat?.cover&&<><defs><clipPath id="clip-center"><rect x="186" y="176" width="148" height="168" rx="3"/></clipPath></defs><image href={cat.cover} x="186" y="176" width="148" height="168" preserveAspectRatio="xMidYMid slice" clipPath="url(#clip-center)"/></>}
-            <rect x="185" y="295" width="150" height="50" rx="0" fill="rgba(10,10,10,0.92)"/>
-            <text x="260" y="314" textAnchor="middle" fontFamily="'Montserrat',sans-serif" fontSize="7.5" letterSpacing="3" fill="rgba(201,185,154,0.7)">{cat?.name?.toUpperCase()}</text>
-            <text x="260" y="332" textAnchor="middle" fontFamily="'Montserrat',sans-serif" fontSize="6.5" letterSpacing="2" fill="rgba(201,185,154,0.45)">{cat?.count} looks · ver colección</text>
+            <rect x="185" y="322" width="150" height="22" rx="0" fill="rgba(10,10,10,0.88)"/>
+            <text x="260" y="337" textAnchor="middle" fontFamily="'Montserrat',sans-serif" fontSize="7" letterSpacing="3" fill="rgba(201,185,154,0.85)">{cat?.name?.toUpperCase()}</text>
           </g>
           {[[-1,-1],[1,-1],[-1,1],[1,1]].map(([sx,sy],i)=>(
             <g key={i}>
