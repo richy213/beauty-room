@@ -684,7 +684,7 @@ export default function Home({ categories: initialCategories, siteContent }) {
         </section>
 
         {/* ── VALORES ── */}
-        <section style={{background:"#0A0A0A",padding:"8rem 0"}}>
+        <section style={{background:"#0A0A0A",padding:"5rem 0 8rem"}}>
           <div style={{maxWidth:"1100px",margin:"0 auto",padding:"0 3rem",display:"grid",gridTemplateColumns:"1fr 1.2fr",gap:"6rem",alignItems:"center"}} className="valores-grid">
             {/* Left column */}
             <div>
