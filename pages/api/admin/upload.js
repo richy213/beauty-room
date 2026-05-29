@@ -1,26 +1,27 @@
 // pages/api/admin/upload.js
-import fs from "fs";
-import path from "path";
-
-export const config = { api: { bodyParser: { sizeLimit: "10mb" } } };
+// Client upload: el archivo va directo del browser a Vercel Blob (sin límite de 4.5 MB)
+import { handleUpload } from "@vercel/blob/client";
 
 const ADMIN_TOKEN = process.env.ADMIN_PASSWORD || "noreh2025";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).end();
-  if (req.headers["x-admin-token"] !== ADMIN_TOKEN) {
-    return res.status(401).json({ error: "No autorizado" });
+  try {
+    const body = await handleUpload({
+      request: req,
+      response: res,
+      onBeforeGenerateToken: async (pathname, clientPayload) => {
+        // clientPayload contiene el token del admin enviado desde el browser
+        if (clientPayload !== ADMIN_TOKEN) {
+          throw new Error("No autorizado");
+        }
+        return {
+          allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"],
+        };
+      },
+      onUploadCompleted: async () => {},
+    });
+    return res.status(200).json(body);
+  } catch (err) {
+    return res.status(401).json({ error: err.message });
   }
-
-  const { filename, data } = req.body;
-  if (!filename || !data) return res.status(400).json({ error: "Missing filename or data" });
-
-  const safe = path.basename(filename).replace(/[^a-zA-Z0-9._-]/g, "_");
-  const uploadsDir = path.join(process.cwd(), "public", "uploads");
-  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-
-  const base64 = data.replace(/^data:image\/\w+;base64,/, "");
-  fs.writeFileSync(path.join(uploadsDir, safe), Buffer.from(base64, "base64"));
-
-  res.status(200).json({ url: `/uploads/${safe}` });
 }

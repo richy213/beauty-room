@@ -1,6 +1,7 @@
 // pages/admin.js — CMS para Noreh Beauty Room
 import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
+import { upload } from "@vercel/blob/client";
 
 const TABS = ["Hero", "Sobre mí", "Valores", "Servicios", "Especialidades", "Testimonios", "Social"];
 const G = { bg:"#0d0c0b", surface:"#171512", border:"rgba(201,185,154,0.15)", gold:"#C9B99A", text:"#FAF8F5", muted:"#9A9490" };
@@ -27,22 +28,25 @@ function ImageField({ label, value, onChange, hint }) {
 
   useEffect(() => { setPreview(value); }, [value]);
 
-  const handleFile = (e) => {
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async () => {
-      try {
-        const res = await fetch("/api/admin/upload", {
-          method:"POST",
-          headers:{ "Content-Type":"application/json", "x-admin-token": sessionStorage.getItem("nbr-admin-token")||"" },
-          body: JSON.stringify({ filename: file.name, data: reader.result })
-        });
-        const j = await res.json();
-        if (j.url) { setPreview(j.url); onChange(j.url); }
-      } catch(err) { alert("Error subiendo imagen: " + err.message); }
-    };
-    reader.readAsDataURL(file);
+    setUploading(true);
+    try {
+      const blob = await upload(`noreh-admin/${Date.now()}-${file.name}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/admin/upload",
+        clientPayload: sessionStorage.getItem("nbr-admin-token") || "",
+      });
+      setPreview(blob.url);
+      onChange(blob.url);
+    } catch (err) {
+      alert("Error subiendo imagen: " + err.message);
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -56,9 +60,9 @@ function ImageField({ label, value, onChange, hint }) {
       )}
       <div style={{ display:"flex", gap:"0.5rem", flexWrap:"wrap" }}>
         <input type="text" placeholder="URL de imagen..." value={value||""} onChange={e=>{ onChange(e.target.value); setPreview(e.target.value); }}
-          style={{ flex:1, minWidth:"200px", background:G.surface, border:`1px solid ${G.border}`, color:G.text, padding:"0.6rem 0.8rem", fontSize:"0.75rem", outline:"none", fontFamily:"inherit" }}/>
-        <button onClick={()=>fileRef.current?.click()} style={{ background:"rgba(201,185,154,0.12)", border:`1px solid ${G.border}`, color:G.gold, padding:"0.6rem 1rem", fontSize:"0.6rem", letterSpacing:"0.2em", cursor:"pointer", textTransform:"uppercase" }}>
-          Subir archivo
+          style={{ flex:1, minWidth:"0", background:G.surface, border:`1px solid ${G.border}`, color:G.text, padding:"0.6rem 0.8rem", fontSize:"0.75rem", outline:"none", fontFamily:"inherit" }}/>
+        <button onClick={()=>!uploading && fileRef.current?.click()} style={{ flexShrink:0, background:"rgba(201,185,154,0.12)", border:`1px solid ${G.border}`, color:G.gold, padding:"0.6rem 1rem", fontSize:"0.6rem", letterSpacing:"0.2em", cursor:uploading?"wait":"pointer", textTransform:"uppercase", opacity:uploading?0.5:1 }}>
+          {uploading ? "Subiendo..." : "Subir"}
         </button>
         <input ref={fileRef} type="file" accept="image/*" style={{ display:"none" }} onChange={handleFile}/>
       </div>
@@ -105,8 +109,8 @@ export default function Admin() {
       body: JSON.stringify(content)
     });
     setSaving(false);
-    if (res.ok) { setMsg("✓ Cambios guardados correctamente"); }
-    else { setMsg("✗ Error al guardar. Verifica la contraseña."); }
+    if (res.ok) { setMsg("✓ Guardado"); }
+    else { setMsg("✗ Error al guardar"); }
     setTimeout(()=>setMsg(""), 4000);
   };
 
@@ -124,18 +128,18 @@ export default function Admin() {
   };
 
   const navStyle = (i) => ({
-    padding:"0.6rem 1.2rem", fontSize:"0.58rem", letterSpacing:"0.2em", textTransform:"uppercase",
-    cursor:"pointer", border:"none",
+    padding:"0.6rem 1rem", fontSize:"0.55rem", letterSpacing:"0.2em", textTransform:"uppercase",
+    cursor:"pointer", border:"none", whiteSpace:"nowrap",
     background: tab===i ? "rgba(201,185,154,0.15)" : "transparent",
     color: tab===i ? G.gold : G.muted,
     borderBottom: tab===i ? `1px solid ${G.gold}` : "1px solid transparent",
-    transition:"all 0.2s"
+    transition:"all 0.2s", fontFamily:"inherit"
   });
 
   if (!authed) return (
-    <div style={{ minHeight:"100vh", background:G.bg, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Montserrat',sans-serif" }}>
+    <div style={{ minHeight:"100vh", background:G.bg, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Montserrat',sans-serif", padding:"1rem" }}>
       <Head><title>Admin — Noreh Beauty Room</title></Head>
-      <form onSubmit={handleLogin} style={{ width:"360px", padding:"3rem", background:G.surface, border:`1px solid ${G.border}` }}>
+      <form onSubmit={handleLogin} style={{ width:"100%", maxWidth:"360px", padding:"clamp(1.5rem,6vw,3rem)", background:G.surface, border:`1px solid ${G.border}` }}>
         <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:"1.8rem", color:G.gold, marginBottom:"0.3rem", fontStyle:"italic" }}>Noreh Beauty Room</div>
         <div style={{ fontSize:"0.5rem", letterSpacing:"0.4em", textTransform:"uppercase", color:G.muted, marginBottom:"2rem" }}>Panel de administración</div>
         <label style={{ fontSize:"0.55rem", letterSpacing:"0.3em", textTransform:"uppercase", color:G.muted, display:"block", marginBottom:"0.4rem" }}>Contraseña</label>
@@ -145,10 +149,6 @@ export default function Admin() {
         <button type="submit" style={{ width:"100%", background:G.gold, color:"#0d0c0b", border:"none", padding:"0.9rem", fontSize:"0.6rem", letterSpacing:"0.25em", textTransform:"uppercase", cursor:"pointer", fontWeight:500, fontFamily:"inherit" }}>
           Entrar
         </button>
-        <p style={{ marginTop:"1rem", fontSize:"0.55rem", color:G.muted, textAlign:"center" }}>
-          Contraseña por defecto: <code style={{ color:G.gold }}>noreh2025</code><br/>
-          <span style={{ fontSize:"0.5rem" }}>Cámbiala en <code>.env.local</code> → <code>ADMIN_PASSWORD=tucontraseña</code></span>
-        </p>
       </form>
     </div>
   );
@@ -164,28 +164,28 @@ export default function Admin() {
       <Head><title>Admin CMS — Noreh Beauty Room</title></Head>
 
       {/* Header */}
-      <div style={{ background:G.surface, borderBottom:`1px solid ${G.border}`, padding:"1rem 2rem", display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0, zIndex:100 }}>
-        <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:"1.2rem", color:G.gold, fontStyle:"italic" }}>Noreh Beauty Room</div>
-        <div style={{ display:"flex", alignItems:"center", gap:"1rem" }}>
+      <div className="adm-header" style={{ background:G.surface, borderBottom:`1px solid ${G.border}`, padding:"0.9rem 1.5rem", display:"flex", alignItems:"center", justifyContent:"space-between", gap:"0.8rem", flexWrap:"wrap", position:"sticky", top:0, zIndex:100 }}>
+        <div style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:"1.1rem", color:G.gold, fontStyle:"italic", flexShrink:0 }}>Noreh Beauty Room</div>
+        <div style={{ display:"flex", alignItems:"center", gap:"0.6rem", flexWrap:"wrap" }}>
           {msg && <span style={{ fontSize:"0.6rem", color: msg.startsWith("✓") ? "#5D9" : "#E88" }}>{msg}</span>}
           <button onClick={save} disabled={saving}
-            style={{ background:G.gold, color:"#0d0c0b", border:"none", padding:"0.6rem 1.6rem", fontSize:"0.58rem", letterSpacing:"0.2em", textTransform:"uppercase", cursor:"pointer", fontWeight:500, opacity:saving?0.6:1, fontFamily:"inherit" }}>
-            {saving ? "Guardando..." : "Guardar cambios"}
+            style={{ background:G.gold, color:"#0d0c0b", border:"none", padding:"0.55rem 1.2rem", fontSize:"0.55rem", letterSpacing:"0.2em", textTransform:"uppercase", cursor:"pointer", fontWeight:500, opacity:saving?0.6:1, fontFamily:"inherit", whiteSpace:"nowrap" }}>
+            {saving ? "Guardando..." : "Guardar"}
           </button>
           <button onClick={()=>{sessionStorage.removeItem("nbr-admin-token");setAuthed(false);}}
-            style={{ background:"transparent", border:`1px solid ${G.border}`, color:G.muted, padding:"0.6rem 1rem", fontSize:"0.58rem", letterSpacing:"0.2em", textTransform:"uppercase", cursor:"pointer", fontFamily:"inherit" }}>
+            style={{ background:"transparent", border:`1px solid ${G.border}`, color:G.muted, padding:"0.55rem 0.9rem", fontSize:"0.55rem", letterSpacing:"0.2em", textTransform:"uppercase", cursor:"pointer", fontFamily:"inherit", whiteSpace:"nowrap" }}>
             Salir
           </button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div style={{ background:G.surface, borderBottom:`1px solid ${G.border}`, padding:"0 2rem", display:"flex", overflowX:"auto" }}>
+      <div style={{ background:G.surface, borderBottom:`1px solid ${G.border}`, padding:"0 1rem", display:"flex", overflowX:"auto", scrollbarWidth:"none" }}>
         {TABS.map((t,i) => <button key={t} onClick={()=>setTab(i)} style={navStyle(i)}>{t}</button>)}
       </div>
 
       {/* Content */}
-      <div style={{ maxWidth:"860px", margin:"0 auto", padding:"2.5rem 2rem" }}>
+      <div style={{ maxWidth:"860px", margin:"0 auto", padding:"clamp(1.2rem,4vw,2.5rem) clamp(1rem,4vw,2rem)" }}>
 
         {/* HERO */}
         {tab===0 && (
@@ -207,7 +207,7 @@ export default function Admin() {
             <hr style={{ border:`none`, borderTop:`1px solid ${G.border}`, margin:"1.5rem 0" }}/>
             <p style={{ fontSize:"0.55rem", letterSpacing:"0.3em", textTransform:"uppercase", color:G.gold, marginBottom:"1rem" }}>Estadísticas</p>
             {content.about?.stats?.map((s,i) => (
-              <div key={i} style={{ display:"grid", gridTemplateColumns:"1fr 2fr", gap:"0.8rem", marginBottom:"0.8rem", alignItems:"end" }}>
+              <div key={i} className="adm-grid-2" style={{ display:"grid", gridTemplateColumns:"1fr 2fr", gap:"0.8rem", marginBottom:"0.8rem", alignItems:"end" }}>
                 <Field label={`Número ${i+1}`} value={s.number} onChange={v=>set(`about.stats.${i}.number`,v)}/>
                 <Field label={`Etiqueta ${i+1}`} value={s.label} onChange={v=>set(`about.stats.${i}.label`,v)}/>
               </div>
@@ -237,7 +237,7 @@ export default function Admin() {
               <div key={i} style={{ background:G.surface, border:`1px solid ${G.border}`, padding:"1.4rem", marginBottom:"1.2rem" }}>
                 <p style={{ fontSize:"0.52rem", color:G.gold, letterSpacing:"0.3em", textTransform:"uppercase", marginBottom:"0.8rem" }}>Servicio {i+1}</p>
                 <ImageField label="Foto del servicio" value={s.photo} onChange={v=>set(`servicios.${i}.photo`,v)}/>
-                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0.8rem" }}>
+                <div className="adm-grid-2" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0.8rem" }}>
                   <Field label="Categoría" value={s.category} onChange={v=>set(`servicios.${i}.category`,v)}/>
                   <Field label="Precio" value={s.price} onChange={v=>set(`servicios.${i}.price`,v)}/>
                 </div>
@@ -259,7 +259,7 @@ export default function Admin() {
             <hr style={{ border:"none", borderTop:`1px solid ${G.border}`, margin:"1.5rem 0" }}/>
             {content.especialidades?.items?.map((item,i) => (
               <div key={i} style={{ background:G.surface, border:`1px solid ${G.border}`, padding:"1.2rem", marginBottom:"1rem" }}>
-                <div style={{ display:"grid", gridTemplateColumns:"80px 1fr", gap:"0.8rem", alignItems:"end" }}>
+                <div className="adm-grid-num" style={{ display:"grid", gridTemplateColumns:"80px 1fr", gap:"0.8rem", alignItems:"end" }}>
                   <Field label="Nº" value={item.num} onChange={v=>set(`especialidades.items.${i}.num`,v)}/>
                   <Field label="Nombre" value={item.name} onChange={v=>set(`especialidades.items.${i}.name`,v)}/>
                 </div>
@@ -277,7 +277,7 @@ export default function Admin() {
               <div key={i} style={{ background:G.surface, border:`1px solid ${G.border}`, padding:"1.2rem", marginBottom:"1rem" }}>
                 <p style={{ fontSize:"0.52rem", color:G.gold, letterSpacing:"0.3em", textTransform:"uppercase", marginBottom:"0.8rem" }}>Testimonio {i+1}</p>
                 <Field label="Cita" value={t.quote} onChange={v=>set(`testimonios.${i}.quote`,v)} textarea/>
-                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0.8rem" }}>
+                <div className="adm-grid-2" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"0.8rem" }}>
                   <Field label="Nombre" value={t.author} onChange={v=>set(`testimonios.${i}.author`,v)}/>
                   <Field label="Rol / descripción" value={t.role} onChange={v=>set(`testimonios.${i}.role`,v)}/>
                 </div>
@@ -297,7 +297,7 @@ export default function Admin() {
         )}
 
         {/* Save bottom */}
-        <div style={{ marginTop:"3rem", paddingTop:"2rem", borderTop:`1px solid ${G.border}`, display:"flex", gap:"1rem", alignItems:"center" }}>
+        <div style={{ marginTop:"3rem", paddingTop:"2rem", borderTop:`1px solid ${G.border}`, display:"flex", gap:"1rem", alignItems:"center", flexWrap:"wrap" }}>
           <button onClick={save} disabled={saving}
             style={{ background:G.gold, color:"#0d0c0b", border:"none", padding:"0.9rem 2.5rem", fontSize:"0.62rem", letterSpacing:"0.25em", textTransform:"uppercase", cursor:"pointer", fontWeight:500, opacity:saving?0.6:1, fontFamily:"inherit" }}>
             {saving ? "Guardando..." : "Guardar cambios"}
@@ -305,9 +305,22 @@ export default function Admin() {
           <a href="/" target="_blank" style={{ fontSize:"0.6rem", letterSpacing:"0.2em", color:G.muted, textDecoration:"none", textTransform:"uppercase" }}>
             Ver sitio →
           </a>
-          {msg && <span style={{ fontSize:"0.65rem", color: msg.startsWith("✓") ? "#5D9" : "#E88", flex:1, textAlign:"right" }}>{msg}</span>}
+          {msg && <span style={{ fontSize:"0.65rem", color: msg.startsWith("✓") ? "#5D9" : "#E88" }}>{msg}</span>}
         </div>
       </div>
+
+      <style dangerouslySetInnerHTML={{__html:`
+        *{box-sizing:border-box}
+        .adm-header{flex-wrap:wrap}
+        /* Tabs sin scrollbar visible */
+        div[style*="overflowX"]::-webkit-scrollbar{display:none}
+
+        /* Grids → 1 columna en móvil */
+        @media(max-width:480px){
+          .adm-grid-2{grid-template-columns:1fr!important}
+          .adm-grid-num{grid-template-columns:1fr!important}
+        }
+      `}}/>
     </div>
   );
 }

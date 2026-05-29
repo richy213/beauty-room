@@ -2,15 +2,29 @@
 import Head from "next/head";
 import { useState, useEffect, useRef } from "react";
 
-// ── Galería fullscreen ──────────────────────────────────────
+// ── Galería fullscreen — carga imágenes on-demand ──────────
 function Gallery({ category, onClose }) {
+  const [images, setImages]   = useState([]);
+  const [loading, setLoading] = useState(true);
   const [lightbox, setLightbox] = useState(null);
+
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
   }, []);
+
+  // Carga las imágenes al abrir la galería (no en page load)
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/gallery/${category.id}`)
+      .then(r => r.json())
+      .then(data => { setImages(data.images || []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [category.id]);
+
   return (
     <div style={{position:"fixed",inset:0,background:"#0A0A0A",zIndex:9999,display:"flex",flexDirection:"column",overflowY:"auto"}}>
+      {/* Header */}
       <div style={{position:"sticky",top:0,background:"rgba(10,10,10,0.95)",backdropFilter:"blur(20px)",borderBottom:"1px solid rgba(201,185,154,0.1)",padding:"1.2rem 2rem",display:"flex",justifyContent:"space-between",alignItems:"center",zIndex:10}}>
         <div>
           <div style={{fontFamily:"'Montserrat',sans-serif",fontSize:"0.55rem",letterSpacing:"0.4em",textTransform:"uppercase",color:"rgba(201,185,154,0.5)",marginBottom:"0.2rem"}}>Portfolio</div>
@@ -21,21 +35,38 @@ function Gallery({ category, onClose }) {
           <button onClick={onClose} style={{fontFamily:"'Montserrat',sans-serif",fontSize:"0.55rem",letterSpacing:"0.3em",textTransform:"uppercase",color:"#C9B99A",background:"none",border:"1px solid rgba(201,185,154,0.3)",padding:"0.6rem 1.2rem",cursor:"pointer"}}>Cerrar ✕</button>
         </div>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"3px",padding:"3px"}}>
-        {category.images.map((img, i) => (
-          <div key={img.id} onClick={() => setLightbox(i)} style={{aspectRatio:"2/3",overflow:"hidden",cursor:"pointer",background:"#1a1510",position:"relative"}}>
-            <img src={img.thumb} alt={img.name} loading="lazy" style={{width:"100%",height:"100%",objectFit:"cover",transition:"transform 0.6s cubic-bezier(0.16,1,0.3,1)",display:"block"}}
-              onMouseOver={e=>e.target.style.transform="scale(1.05)"}
-              onMouseOut={e=>e.target.style.transform="scale(1)"}/>
-          </div>
-        ))}
-      </div>
-      {lightbox !== null && (
+
+      {/* Skeleton de carga */}
+      {loading && (
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:"3px",padding:"3px"}}>
+          {Array.from({length: Math.min(category.count, 12)}).map((_,i) => (
+            <div key={i} style={{aspectRatio:"2/3",background:"#1a1510",animation:"galSkeleton 1.4s ease-in-out infinite",animationDelay:`${i*0.05}s`}}/>
+          ))}
+        </div>
+      )}
+
+      {/* Grid de fotos */}
+      {!loading && (
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:"3px",padding:"3px"}}>
+          {images.map((img, i) => (
+            <div key={img.id} onClick={() => setLightbox(i)}
+              style={{aspectRatio:"2/3",overflow:"hidden",cursor:"pointer",background:"#1a1510",position:"relative"}}>
+              <img src={img.thumb} alt={img.name} loading="lazy"
+                style={{width:"100%",height:"100%",objectFit:"cover",transition:"transform 0.5s ease",display:"block"}}
+                onMouseOver={e=>e.target.style.transform="scale(1.05)"}
+                onMouseOut={e=>e.target.style.transform="scale(1)"}/>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Lightbox */}
+      {lightbox !== null && images[lightbox] && (
         <div onClick={()=>setLightbox(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.97)",zIndex:10000,display:"flex",alignItems:"center",justifyContent:"center"}}>
-          <img src={category.images[lightbox].url} style={{maxWidth:"92vw",maxHeight:"92vh",objectFit:"contain"}} onClick={e=>e.stopPropagation()}/>
+          <img src={images[lightbox].url} style={{maxWidth:"92vw",maxHeight:"92vh",objectFit:"contain"}} onClick={e=>e.stopPropagation()}/>
           <button onClick={()=>setLightbox(null)} style={{position:"fixed",top:"1.5rem",right:"1.5rem",background:"none",border:"none",color:"#C9B99A",fontSize:"1.5rem",cursor:"pointer"}}>✕</button>
           {lightbox > 0 && <button onClick={e=>{e.stopPropagation();setLightbox(lightbox-1)}} style={{position:"fixed",left:"1.5rem",top:"50%",transform:"translateY(-50%)",background:"none",border:"1px solid rgba(201,185,154,0.3)",color:"#C9B99A",padding:"1rem",cursor:"pointer",fontFamily:"'Montserrat',sans-serif",fontSize:"0.6rem"}}>←</button>}
-          {lightbox < category.images.length-1 && <button onClick={e=>{e.stopPropagation();setLightbox(lightbox+1)}} style={{position:"fixed",right:"1.5rem",top:"50%",transform:"translateY(-50%)",background:"none",border:"1px solid rgba(201,185,154,0.3)",color:"#C9B99A",padding:"1rem",cursor:"pointer",fontFamily:"'Montserrat',sans-serif",fontSize:"0.6rem"}}>→</button>}
+          {lightbox < images.length-1 && <button onClick={e=>{e.stopPropagation();setLightbox(lightbox+1)}} style={{position:"fixed",right:"1.5rem",top:"50%",transform:"translateY(-50%)",background:"none",border:"1px solid rgba(201,185,154,0.3)",color:"#C9B99A",padding:"1rem",cursor:"pointer",fontFamily:"'Montserrat',sans-serif",fontSize:"0.6rem"}}>→</button>}
         </div>
       )}
     </div>
@@ -147,7 +178,7 @@ function OrbitalPortfolio({ categories }) {
 }
 
 // ── Página principal ────────────────────────────────────────
-export default function Home({ categories, error, siteContent }) {
+export default function Home({ categories: initialCategories, siteContent }) {
   const [theme, setTheme] = useState("dark");
   const [scrolled, setScrolled] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -155,6 +186,9 @@ export default function Home({ categories, error, siteContent }) {
   const [orbState, setOrbState] = useState({ outer:[], inner:[], outerSize:0, innerSize:0 });
   const [testimonioIdx, setTestimonioIdx] = useState(0);
   const [testimonioVisible, setTestimonioVisible] = useState(true);
+  // Fallback: si getStaticProps falló, carga categorías client-side
+  const [categories, setCategories] = useState(initialCategories || []);
+  const [error, setError] = useState(null);
   const cursorRef = useRef(null);
   const isDark = theme === "dark";
 
@@ -229,6 +263,16 @@ export default function Home({ categories, error, siteContent }) {
     compute();
     window.addEventListener("resize", compute);
     return () => window.removeEventListener("resize", compute);
+  }, []);
+
+  // Si las categorías no llegaron en build, las cargamos client-side
+  useEffect(() => {
+    if ((initialCategories || []).length === 0) {
+      fetch("/api/portfolio")
+        .then(r => r.json())
+        .then(data => setCategories(data.categories || []))
+        .catch(() => setError("No se pudo cargar el portfolio"));
+    }
   }, []);
 
   useEffect(() => {
@@ -1068,6 +1112,7 @@ export default function Home({ categories, error, siteContent }) {
 
         /* ── General animations ── */
         @keyframes ldFadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes galSkeleton{0%,100%{opacity:0.4}50%{opacity:0.8}}
         @keyframes ldFadeIn{from{opacity:0}to{opacity:1}}
         @keyframes ldBar{to{width:100%}}
         @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
@@ -1100,27 +1145,31 @@ export default function Home({ categories, error, siteContent }) {
   );
 }
 
-export async function getServerSideProps({ req }) {
-  // Leer contenido del CMS
+// ISR: la página se pre-genera una vez y se sirve desde CDN.
+// Se regenera en background cada hora sin bloquear a los usuarios.
+export async function getStaticProps() {
   let siteContent = {};
+  let categories  = [];
+
+  // Leer CMS
   try {
-    const fs = (await import("fs")).default;
-    const pathMod = (await import("path")).default;
-    const raw = fs.readFileSync(pathMod.join(process.cwd(), "public", "site-content.json"), "utf8");
+    const fs  = (await import("fs")).default;
+    const pth = (await import("path")).default;
+    const raw = fs.readFileSync(pth.join(process.cwd(), "public", "site-content.json"), "utf8");
     siteContent = JSON.parse(raw);
   } catch(e) {}
 
-  // Obtener portfolio via la API interna (que ya tiene caché y funciona correctamente)
-  let categories = [];
+  // Portfolio — las imágenes se cargan on-demand en el cliente
   try {
-    const proto = req.headers["x-forwarded-proto"] || "http";
-    const host  = req.headers.host || "localhost:3004";
-    const res   = await fetch(`${proto}://${host}/api/portfolio`, { next: { revalidate: 0 } });
-    const data  = await res.json();
-    categories  = data.categories || [];
+    const { getPortfolio } = await import("../lib/drive");
+    categories = await getPortfolio();
   } catch(err) {
-    console.error("Portfolio load error:", err.message);
+    console.error("Build portfolio error:", err.message);
+    // categories queda [] → el cliente lo carga via /api/portfolio
   }
 
-  return { props: { categories, error: null, siteContent } };
+  return {
+    props: { categories, siteContent },
+    revalidate: 3600, // ISR: regenerar cada hora en background
+  };
 }
