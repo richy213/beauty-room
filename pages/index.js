@@ -1100,22 +1100,27 @@ export default function Home({ categories, error, siteContent }) {
   );
 }
 
-export async function getServerSideProps() {
+export async function getServerSideProps({ req }) {
+  // Leer contenido del CMS
+  let siteContent = {};
   try {
-    const { getPortfolio } = await import("../lib/drive");
-    const categories = await getPortfolio();
-
     const fs = (await import("fs")).default;
     const pathMod = (await import("path")).default;
-    let siteContent = {};
-    try {
-      const raw = fs.readFileSync(pathMod.join(process.cwd(), "public", "site-content.json"), "utf8");
-      siteContent = JSON.parse(raw);
-    } catch(e) {}
+    const raw = fs.readFileSync(pathMod.join(process.cwd(), "public", "site-content.json"), "utf8");
+    siteContent = JSON.parse(raw);
+  } catch(e) {}
 
-    return { props: { categories, error: null, siteContent } };
-  } catch (err) {
+  // Obtener portfolio via la API interna (que ya tiene caché y funciona correctamente)
+  let categories = [];
+  try {
+    const proto = req.headers["x-forwarded-proto"] || "http";
+    const host  = req.headers.host || "localhost:3004";
+    const res   = await fetch(`${proto}://${host}/api/portfolio`, { next: { revalidate: 0 } });
+    const data  = await res.json();
+    categories  = data.categories || [];
+  } catch(err) {
     console.error("Portfolio load error:", err.message);
-    return { props: { categories: [], error: "Error al cargar el portfolio", siteContent: {} } };
   }
+
+  return { props: { categories, error: null, siteContent } };
 }
