@@ -81,8 +81,8 @@ function OrbitalPortfolio({ categories }) {
         <div style={{fontFamily:"'Montserrat',sans-serif",fontSize:"0.55rem",letterSpacing:"0.5em",textTransform:"uppercase",color:"rgba(201,185,154,0.6)",marginBottom:"0.5rem"}}>Portfolio curado</div>
         <div style={{fontFamily:"'Cormorant Garamond',Georgia,serif",fontSize:"clamp(2rem,5vw,3.5rem)",fontWeight:300,color:"#C9B99A",fontStyle:"italic"}}>Colecciones</div>
       </div>
-      <div style={{display:"none"}} className="orbital-desktop">
-        <svg width="520" height="520" style={{display:"block",margin:"0 auto",cursor:"grab",overflow:"visible",userSelect:"none"}}
+      <div className="orbital-desktop">
+        <svg viewBox="0 0 520 520" style={{display:"block",margin:"0 auto",cursor:"grab",overflow:"visible",userSelect:"none",width:"min(520px,92vw)",height:"auto"}}
           onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
           onTouchStart={onMouseDown} onTouchMove={onMouseMove} onTouchEnd={onMouseUp}>
           {[520,380,220].map(s=><circle key={s} cx="260" cy="260" r={s/2} fill="none" stroke="rgba(201,185,154,0.06)" strokeWidth="1"/>)}
@@ -135,11 +135,11 @@ function OrbitalPortfolio({ categories }) {
           onMouseOver={e=>e.target.style.background="#C4A035"} onMouseOut={e=>e.target.style.background="#C9B99A"}>
           Explorar colección →
         </button>
-        <div style={{fontFamily:"'Montserrat',sans-serif",fontSize:"0.45rem",letterSpacing:"0.25em",textTransform:"uppercase",color:"rgba(201,185,154,0.15)",marginTop:"1rem"}}>Arrastra para rotar · Clic en la imagen para abrir</div>
+        <div style={{fontFamily:"'Montserrat',sans-serif",fontSize:"0.45rem",letterSpacing:"0.25em",textTransform:"uppercase",color:"rgba(201,185,154,0.15)",marginTop:"1rem"}}>Desliza para rotar · Toca la imagen para abrir</div>
       </div>
       <style dangerouslySetInnerHTML={{__html:`
-        @media(min-width:769px){.orbital-desktop{display:block!important}.orbital-mobile{display:none!important}}
-        @media(max-width:768px){.orbital-desktop{display:none!important}.orbital-mobile{display:flex!important}}
+        .orbital-desktop{display:block!important}
+        .orbital-mobile{display:none!important}
         .orbital-mobile::-webkit-scrollbar{display:none}
       `}}/>
     </div>
@@ -943,7 +943,11 @@ export default function Home({ categories, error, siteContent }) {
         html{scroll-behavior:smooth}
         body{overflow-x:hidden;cursor:crosshair}
 
-        /* ── Cursor ── */
+        /* ── Cursor — oculto en dispositivos táctiles ── */
+        @media(pointer:coarse){
+          body{cursor:auto}
+          .nbr-cur{display:none!important}
+        }
         .nbr-cur{
           position:fixed;top:0;left:0;z-index:9999;
           width:8px;height:8px;
