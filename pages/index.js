@@ -120,15 +120,16 @@ function OrbitalPortfolio({ categories }) {
           {[520,380,220].map(s=><circle key={s} cx="260" cy="260" r={s/2} fill="none" stroke="rgba(201,185,154,0.06)" strokeWidth="1"/>)}
           {categories.map((cat,i)=>{
             const pos=getNodePos(i); const isActive=i===current;
+            const posTransition = isDragging.current ? "none" : "x 0.55s cubic-bezier(0.16,1,0.3,1), y 0.55s cubic-bezier(0.16,1,0.3,1)";
             return (
               <g key={cat.id} onClick={()=>{ isActive ? setOpenGallery(cat) : selectIndex(i); }} style={{cursor:"pointer"}}>
                 <rect x={pos.x-36} y={pos.y-45} width="72" height="90" rx="4"
                   fill={isActive?"rgba(201,185,154,0.12)":"rgba(201,185,154,0.03)"}
                   stroke={isActive?"rgba(201,185,154,0.7)":"rgba(201,185,154,0.15)"}
-                  strokeWidth={isActive?"1":"0.5"}/>
-                {cat.cover?<image href={cat.cover} x={pos.x-35} y={pos.y-44} width="70" height="88" preserveAspectRatio="xMidYMid slice" clipPath={`url(#clip-${i})`}/>
-                  :<text x={pos.x} y={pos.y+10} textAnchor="middle" fill="rgba(201,185,154,0.2)" fontFamily="'Cormorant Garamond',serif" fontSize="28" fontStyle="italic">{cat.name[0]}</text>}
-                <defs><clipPath id={`clip-${i}`}><rect x={pos.x-35} y={pos.y-44} width="70" height="88" rx="3"/></clipPath></defs>
+                  strokeWidth={isActive?"1":"0.5"} style={{transition:posTransition}}/>
+                {cat.cover?<image href={cat.cover} x={pos.x-35} y={pos.y-44} width="70" height="88" preserveAspectRatio="xMidYMid slice" clipPath={`url(#clip-${i})`} style={{transition:posTransition}}/>
+                  :<text x={pos.x} y={pos.y+10} textAnchor="middle" fill="rgba(201,185,154,0.2)" fontFamily="'Cormorant Garamond',serif" fontSize="28" fontStyle="italic" style={{transition:posTransition}}>{cat.name[0]}</text>}
+                <defs><clipPath id={`clip-${i}`}><rect x={pos.x-35} y={pos.y-44} width="70" height="88" rx="3" style={{transition:posTransition}}/></clipPath></defs>
               </g>
             );
           })}
