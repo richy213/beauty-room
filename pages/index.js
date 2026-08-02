@@ -1,5 +1,6 @@
 // pages/index.js
 import Head from "next/head";
+import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 
 // ── Galería fullscreen — carga imágenes on-demand ──────────
@@ -282,7 +283,16 @@ export default function Home({ categories: initialCategories, siteContent }) {
     const onScroll = () => setScrolled(window.scrollY > 80);
     window.addEventListener("scroll", onScroll, { passive: true });
 
-    const t = setTimeout(() => setLoaded(true), 2600);
+    // El loader se retira cuando termina su animación (2.6s, sincronizada con
+    // la barra en CSS) Y las imágenes de la página ya cargaron — lo que tarde
+    // más. Así el loader realmente cubre el tiempo de carga en vez de ser un
+    // timer ciego. Tope de seguridad por si alguna imagen nunca resuelve.
+    let barDone = false, imagesDone = document.readyState === "complete";
+    const reveal = () => { if (barDone && imagesDone) setLoaded(true); };
+    const barTimer = setTimeout(() => { barDone = true; reveal(); }, 2600);
+    const onPageLoad = () => { imagesDone = true; reveal(); };
+    if (!imagesDone) window.addEventListener("load", onPageLoad);
+    const failsafe = setTimeout(() => { imagesDone = true; reveal(); }, 8000);
 
     const onMove = (e) => {
       if (!cursorRef.current) return;
@@ -296,7 +306,9 @@ export default function Home({ categories: initialCategories, siteContent }) {
 
     return () => {
       window.removeEventListener("scroll", onScroll);
-      clearTimeout(t);
+      clearTimeout(barTimer);
+      clearTimeout(failsafe);
+      window.removeEventListener("load", onPageLoad);
       document.removeEventListener("mousemove", onMove);
     };
   }, []);
@@ -375,7 +387,11 @@ export default function Home({ categories: initialCategories, siteContent }) {
       { number:"04", name:"Maquillaje Artístico Creativo", desc:"Expresión sin límites para proyectos de arte, teatro y contenido digital." },
     ],
   };
-  const especialidadesData = { ...especialidadesFallback, ...(siteContent?.especialidades || {}) };
+  const especialidadesData = {
+    ...especialidadesFallback,
+    ...(siteContent?.especialidades || {}),
+    photo: siteContent?.especialidades?.photo || especialidadesFallback.photo,
+  };
 
   // SVG Icons helpers
   const iconClock = <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#C9B99A" strokeWidth="1.5"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>;
@@ -714,8 +730,9 @@ export default function Home({ categories: initialCategories, siteContent }) {
             <div style={{position:"relative"}}>
               <div style={{aspectRatio:"3/4",background:isDark?"linear-gradient(145deg,#1a1510 0%,#0e0b07 100%)":"linear-gradient(145deg,#EDE8E2 0%,#D8CFC4 100%)",display:"flex",alignItems:"center",justifyContent:"center",border:"1px solid rgba(201,185,154,0.2)",position:"relative",overflow:"hidden"}}>
                 {siteContent?.about?.photo ? (
-                  <img src={siteContent.about.photo} alt="Noreh Mejía"
-                    style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
+                  <Image src={siteContent.about.photo} alt="Noreh Mejía" fill
+                    sizes="(max-width: 768px) 100vw, 550px"
+                    style={{objectFit:"cover"}}/>
                 ) : (
                   <>
                     <div style={{position:"absolute",inset:0,backgroundImage:"repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(201,185,154,0.03) 20px,rgba(201,185,154,0.03) 21px)"}}/>
@@ -759,11 +776,13 @@ export default function Home({ categories: initialCategories, siteContent }) {
               {serviciosData.map((svc, idx) => (
                 <div key={idx} className="svc-card" style={{background:colors.bg,border:"1px solid rgba(201,185,154,0.1)",overflow:"hidden",transition:"border-color 0.35s,transform 0.35s",display:"flex",flexDirection:"column"}}>
                   {/* Photo */}
-                  <div style={{aspectRatio:"4/3",overflow:"hidden",background:"#1a1510"}}>
-                    <img
+                  <div style={{aspectRatio:"4/3",overflow:"hidden",background:"#1a1510",position:"relative"}}>
+                    <Image
                       src={svc.photo || serviciosFotos[idx]}
                       alt={svc.name}
-                      style={{width:"100%",height:"100%",objectFit:"cover",display:"block",transition:"transform 0.6s cubic-bezier(0.16,1,0.3,1)"}}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      style={{objectFit:"cover",transition:"transform 0.6s cubic-bezier(0.16,1,0.3,1)"}}
                       className="svc-photo"
                     />
                   </div>
@@ -802,10 +821,12 @@ export default function Home({ categories: initialCategories, siteContent }) {
         <section style={{background:"#0A0A0A",minHeight:"600px",display:"grid",gridTemplateColumns:"1fr 1fr"}} className="especialidades-section">
           {/* Left: photo + overlay */}
           <div style={{position:"relative",overflow:"hidden",minHeight:"600px"}}>
-            <img
+            <Image
               src={especialidadesData.photo}
               alt="Especialidades"
-              style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"cover",display:"block"}}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              style={{objectFit:"cover"}}
             />
             <div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,rgba(8,8,7,0.82) 0%,rgba(8,8,7,0.55) 100%)"}}/>
             <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",justifyContent:"center",padding:"4rem"}}>
@@ -985,6 +1006,19 @@ export default function Home({ categories: initialCategories, siteContent }) {
             <span style={{fontSize:"0.52rem",letterSpacing:"0.15em",color:"rgba(201,185,154,0.15)",textTransform:"uppercase"}}>© 2025 Noreh Beauty Room</span>
             <span style={{fontSize:"0.52rem",letterSpacing:"0.15em",color:"rgba(201,185,154,0.15)",textTransform:"uppercase"}}>Ciudad de México</span>
           </div>
+          <div style={{maxWidth:"1100px",margin:"0 auto",padding:"1.5rem 3rem 0",textAlign:"center"}}>
+            <a href="https://www.instagram.com/ricardooxc/" target="_blank" rel="noopener noreferrer"
+              className="dev-credit"
+              style={{display:"inline-flex",alignItems:"center",gap:"0.55rem",textDecoration:"none",color:"rgba(201,185,154,0.32)",transition:"color 0.4s"}}>
+              <span style={{fontFamily:"'Montserrat',sans-serif",fontSize:"0.46rem",letterSpacing:"0.28em",textTransform:"uppercase",fontWeight:300}}>Sitio desarrollado por</span>
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.6" style={{flexShrink:0}}>
+                <rect x="2" y="2" width="20" height="20" rx="5"/>
+                <circle cx="12" cy="12" r="4.5"/>
+                <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/>
+              </svg>
+              <span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1rem",fontStyle:"italic",fontWeight:400,letterSpacing:"0.02em"}}>Ricardo</span>
+            </a>
+          </div>
         </footer>
       </div>
 
@@ -1115,6 +1149,11 @@ export default function Home({ categories: initialCategories, siteContent }) {
 
         /* ── Especialidad item hover ── */
         .espec-item:hover{background:rgba(201,185,154,0.04)!important;}
+
+        /* ── Dev credit ── */
+        .dev-credit:hover{color:#C9B99A!important;}
+        .dev-credit:hover svg{transform:scale(1.15);}
+        .dev-credit svg{transition:transform 0.35s;}
 
         /* ── General animations ── */
         @keyframes ldFadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
