@@ -790,8 +790,7 @@ export default function Home({ categories: initialCategories, siteContent }) {
                   {/* Body */}
                   <div style={{padding:"1.8rem",display:"flex",flexDirection:"column",flex:1}}>
                     <div style={{fontSize:"0.48rem",letterSpacing:"0.4em",textTransform:"uppercase",color:colors.ch,marginBottom:"0.6rem"}}>{svc.category}</div>
-                    <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.4rem",fontWeight:400,color:colors.text,marginBottom:"0.4rem",lineHeight:1.2}}>{svc.name}</div>
-                    <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1rem",fontStyle:"italic",color:colors.ch,marginBottom:"1rem"}}>{svc.price}</div>
+                    <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.4rem",fontWeight:400,color:colors.text,marginBottom:"0.8rem",lineHeight:1.2}}>{svc.name}</div>
                     <p style={{fontSize:"0.65rem",lineHeight:1.9,color:colors.muted,fontWeight:300,marginBottom:"1.2rem",opacity:0.72}}>{svc.desc || svc.description}</p>
                     {svc.features && (
                       <ul style={{listStyle:"none",marginBottom:"1.5rem",display:"flex",flexDirection:"column",gap:"0.4rem"}}>
@@ -808,7 +807,7 @@ export default function Home({ categories: initialCategories, siteContent }) {
                         style={{display:"inline-block",fontSize:"0.55rem",letterSpacing:"0.22em",textTransform:"uppercase",color:colors.ch,border:"1px solid rgba(201,185,154,0.35)",padding:"0.7rem 1.5rem",textDecoration:"none",transition:"all 0.3s",fontFamily:"'Montserrat',sans-serif"}}
                         onMouseOver={e=>{e.currentTarget.style.background="rgba(201,185,154,0.1)";e.currentTarget.style.borderColor=colors.ch;}}
                         onMouseOut={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.borderColor="rgba(201,185,154,0.35)";}}>
-                        Agendar →
+                        Preguntar precio →
                       </a>
                     </div>
                   </div>
