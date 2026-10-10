@@ -184,6 +184,18 @@ export default function Home({ categories: initialCategories, siteContent }) {
   const [scrolled, setScrolled] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Bloquea el scroll de fondo mientras el menu movil esta abierto — sin
+  // esto el contenido de atras se movia/recalculaba al mismo tiempo que el
+  // overlay aparecia, lo que se sentia como que "sacaba" al usuario de la
+  // vista inmersiva (barra de direccion reapareciendo en movil).
+  useEffect(() => {
+    if (!menuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [menuOpen]);
+
   const [orbState, setOrbState] = useState({ outer:[], inner:[], outerSize:0, innerSize:0 });
   const [testimonioIdx, setTestimonioIdx] = useState(0);
   const [testimonioVisible, setTestimonioVisible] = useState(true);
@@ -507,15 +519,23 @@ export default function Home({ categories: initialCategories, siteContent }) {
           </div>
         </nav>
 
-        {/* Mobile overlay */}
-        {menuOpen && (
-          <div style={{position:"fixed",inset:0,zIndex:499,background:isDark?"rgba(8,8,7,0.97)":"rgba(250,248,245,0.97)",backdropFilter:"blur(20px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"2.5rem"}}>
-            {[["Sobre mí","#sobre-mí"],["Servicios","#servicios"],["Portfolio","#portfolio"],["Contacto","#contacto"]].map(([l,href])=>(
-              <a key={l} href={href} onClick={()=>setMenuOpen(false)}
-                style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"2.5rem",fontWeight:300,fontStyle:"italic",color:colors.ch,textDecoration:"none",letterSpacing:"0.05em"}}>{l}</a>
-            ))}
-          </div>
-        )}
+        {/* Mobile overlay — siempre montado (nunca se desmonta/remonta) y
+            animado con opacity/visibility en vez de aparecer de golpe, para
+            que no haya que re-pintar el backdrop-filter cada vez que se abre */}
+        <div className="mobile-menu-overlay" style={{
+            position:"fixed",inset:0,zIndex:499,
+            background:isDark?"rgba(8,8,7,0.97)":"rgba(250,248,245,0.97)",
+            backdropFilter:"blur(16px)",
+            display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"2.5rem",
+            opacity:menuOpen?1:0,
+            visibility:menuOpen?"visible":"hidden",
+            pointerEvents:menuOpen?"all":"none",
+          }}>
+          {[["Sobre mí","#sobre-mí"],["Servicios","#servicios"],["Portfolio","#portfolio"],["Contacto","#contacto"]].map(([l,href])=>(
+            <a key={l} href={href} onClick={()=>setMenuOpen(false)}
+              style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"2.5rem",fontWeight:300,fontStyle:"italic",color:colors.ch,textDecoration:"none",letterSpacing:"0.05em"}}>{l}</a>
+          ))}
+        </div>
 
         {/* ── HERO ── */}
         <section style={{height:"100vh",minHeight:"600px",background:"#080807",position:"relative",overflow:"hidden",cursor:"crosshair"}}>
@@ -1154,6 +1174,9 @@ export default function Home({ categories: initialCategories, siteContent }) {
         .dev-credit:hover{color:#C9B99A!important;}
         .dev-credit:hover svg{transform:scale(1.15);}
         .dev-credit svg{transition:transform 0.35s;}
+
+        /* ── Menu movil ── */
+        .mobile-menu-overlay{transition:opacity 0.3s ease,visibility 0.3s ease;}
 
         /* ── General animations ── */
         @keyframes ldFadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
